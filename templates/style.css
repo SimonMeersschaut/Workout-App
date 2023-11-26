@@ -1,0 +1,157 @@
+body {
+  font-family: 'Arial', sans-serif;
+	
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #20242A;
+  color: white;
+}
+body{
+  margin:20px;
+}
+h2{
+  margin-top:5px;
+  margin-bottom:5px;
+}
+button{
+  background-color: #FED32C;
+	color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding:10px;
+  position: relative;
+  font-size: larger;
+}
+input{
+	font-size: 20px;
+	width: 50px;
+	border: none;
+	border-bottom: 1px solid white;
+	color: white;
+	background: transparent;
+	outline:none;
+	border-radius: 0;
+}
+input:active{
+  border-bottom: 2px solid white;
+}
+
+::placeholder {
+  color: rgba(255, 255, 255, 0.767);
+  opacity: 1; /* Firefox */
+}
+
+input:active::placeholder{
+  color:transparent;
+}
+
+::-ms-input-placeholder { /* Edge 12-18 */
+  color: rgba(255, 255, 255, 0.767);
+}
+#popup-container {
+  /* display: none; */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2B3038;
+  padding: 15px;
+  min-height: 200px;
+  /* padding-bottom: 300px; temp testing */
+  box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  transform:translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Navigation bar styling */
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px;
+  border-top: white 1px solid;
+}
+/* Circular button styling */
+.navbar button {
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+  margin: 0 5px;
+  width: 40px; /* Adjust the width as needed */
+  height: 40px; /* Adjust the height as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.navbar button img {
+  width: 100%; /* Ensure the SVG image takes up the entire button */
+  height: 100%;
+  object-fit: contain; /* Maintain the aspect ratio of the SVG */
+}
+
+/* Exercise container styling */
+.exercise {
+  max-width: 800px;
+  margin: 20px auto 20px; /* Added top margin to account for the fixed navbar */
+  padding: 10px;
+  background-color: #2B3038;
+  border-radius: 8px;
+  cursor:pointer;
+}
+
+.additional-info{
+  padding-top: 5px;
+  table-layout: auto;
+  /* border-spacing: 20px 0; */
+}
+.additional-info table{
+  width: min-content;
+}
+td{
+  padding-left: 50px;
+}
+.info-field.active{
+  background-color: #FED32C;
+  color: black;
+  padding: 7px;
+  border-radius: 10px;
+  font-size: 15x;
+}
+.info-field:not(.active){
+  font-weight: lighter;
+  font-size:12px;
+}
+/* Media query for larger screens */
+@media (min-width: 769px) {
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border:none;
+  }
+  body{
+    margin-top:50px;
+  }
+}
+
+/* Media query for smaller screens (mobile) */
+@media (max-width: 768px) {
+  .navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1; /* Ensure the navbar is on top of the content */
+  }
+
+  .exercise-container {
+    margin-bottom: 60px; /* Adjusted bottom margin for mobile screens */
+  }
+}

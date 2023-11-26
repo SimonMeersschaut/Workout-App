@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Website</title>
+  <link rel="stylesheet" href="/file/style.css">
+</head>
+<body>
+  <h1>Exercices</h1>
+  <div id="exercices-container">
+    
+  </div>
+  <div class="navbar">
+    <button onclick="Workouts()">
+      <img src="/file/dumbell.svg" alt="Workouts">
+    </button>
+    <button onclick="Profile()">
+      <img src="/file/profile.svg" alt="Profile">
+    </button>
+  </div>
+  
+  <div class='button-container'>
+  </div>
+  
+  <script src="/file/script.js"></script>
+  <script src="/file/popups.js"></script>
+  <script>
+    function SubmitExercice(id){
+      popup = document.getElementById('popup-container')
+      fetch('/submitExercice', {
+        method: "POST",
+        body: JSON.stringify({"id":id}),
+      })
+      hidePopup()
+    }
+    function showWorkoutPopup(reps, weight, id){
+      dom = '<div>\
+      <h2>Shoulder press</h2>\
+      <input id="reps" placeholder="'+reps+'" type="tel" \> x <input id="reps" placeholder="'+ weight+'" type="tel" \>kg\
+      <button style="width:calc(100% - 65px); bottom:10px; position:absolute; display:block;" onclick="SubmitExercice(' + id + ')">Done</button>\
+      </div>'
+      showPopup(dom);
+    }
+    
+    function loadExercices(){
+      fetch('/my-exercices')
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data)
+        innerHTML = ''
+        for (let i=0; i<data['exercices'].length; i++){
+          console.log(data['exercices'][i])
+
+          items = ''
+          for (const [key, value] of Object.entries(data['exercices'][i])) {
+            if (value != null){
+              if (false){
+                header = '<span>1RM</span><br>'
+              }else{
+                header = ''
+              }
+              main_field = '<span>' + value + '</span>'
+              items = items + '<td class="info-field">'+main_field+'</td>'
+            }
+          }
+          innerHTML = innerHTML + '\
+          <div class="exercise" onclick="showWorkoutPopup(13, 20, '+ data['exercices'][i]['id'] +')">\
+            <h2>' + data['exercices'][i]['name'] +'</h2>\
+            <table class="additional-info">\
+              ' + items + '\
+            </table>\
+          </div>'
+        }
+        document.getElementById('exercices-container').innerHTML = innerHTML
+      });
+    }
+    loadExercices()
+  </script>
+  </body>
+</html>
