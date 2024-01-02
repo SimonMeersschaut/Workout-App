@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Workout Website</title>
   <link rel="stylesheet" href="/api/file/style.css">
+  <style>
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 40px);
+      gap: 5px;
+    }
+    .day {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      cursor: pointer;
+
+      border: solid rgba(0, 0, 0, 0.336) 1px;
+      border-radius: 100%;
+    }
+    .day.active {
+      background-color: #fed42c;
+      color: black;
+      border: solid 1px gray;
+    }
+  </style>
 </head>
 <body>
   <h1 id="workout-name">Profile</h1>
@@ -18,8 +42,41 @@
       <img src="/api/file/profile.svg" alt="Profile">
     </button>
   </div>
+  <div id="calendar"></div>
   
   <script src="/api/file/script.js"></script>
   <script src="/api/file/popups.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/user_data/active_days/'+last_segment())
+      .then(response => response.json())
+      .then(data => {
+          const calendarContainer = document.getElementById('calendar');
+          const daysInMonth = 31; // Set the number of days in the month
+          const startingDay = new Date().getDay(); // Get the current day of the week
+    
+          for (let day = 1; day <= daysInMonth + startingDay; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.classList.add('day');
+            if ((day - startingDay) in data['data']){
+              dayElement.classList.add('active');
+            }
+    
+    
+            if (day > startingDay) {
+              dayElement.textContent = day - startingDay;
+            }
+    
+            // Ensure that Monday is considered the first day of the week
+            const adjustedDay = (day + 5) % 7;
+            dayElement.style.gridColumn = adjustedDay === 0 ? 7 : adjustedDay;
+    
+            // You can add additional logic or events here
+    
+            calendarContainer.appendChild(dayElement);
+          }
+        });
+    })
+    </script>
   </body>
 </html>

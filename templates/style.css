@@ -68,7 +68,8 @@ input:active::placeholder{
   transform: translate(-50%, -50%);
   background-color: #20242A;
   min-height: 200px;
-  min-width: 500px;
+  width: 80vw;
+  max-width: 500px;
   border-radius: 20px;
   padding: 20px;
   border: solid rgba(128, 128, 128, 0.212) 2px;
@@ -87,7 +88,7 @@ input:active::placeholder{
   align-items: center;
   padding: 10px;
   border-top: white 1px solid;
-  /* background: solid gray; */
+  background: #20242A;
 }
 /* Circular button styling */
 .navbar button {
@@ -172,9 +173,11 @@ input:active::placeholder{
     left: 0;
     width: 100%;
     border:none;
+    border-bottom: solid 3px #1b1f24
   }
   body{
     margin-top:50px;
+    padding-top: 20px;
   }
 }
 
@@ -187,7 +190,9 @@ input:active::placeholder{
     width: 100%;
     z-index: 1; /* Ensure the navbar is on top of the content */
   }
-
+  body{
+    padding-bottom: 40px;
+  }
   .exercise-container {
     margin-bottom: 60px; /* Adjusted bottom margin for mobile screens */
   }

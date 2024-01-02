@@ -58,7 +58,7 @@
       }
     }
     function loadWorkouts(){
-      fetch('/api/Simon/workouts')
+      fetch('/api/workouts')
       .then(resp => resp.json())
       .then(response => response['data'])
       .then(workouts => {

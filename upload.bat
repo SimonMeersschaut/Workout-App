@@ -1,0 +1,1 @@
+scp -r * root@172.104.237.206:workoutapp

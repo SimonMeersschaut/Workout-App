@@ -1,6 +1,7 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import json_util
+from datetime import datetime
 import json
 import time
 
@@ -60,7 +61,7 @@ class Database:
             'workout_id': workout_id
         }
         self.users.update_one(
-            {"name": "Simon"},
+            {"name": username},
             {"$push": {"exercices": new_exercice_item}}
         )
 
@@ -80,6 +81,20 @@ class User:
 
     def get_exercices(self) -> list:
         return self.db.users.find({'name': self.username})[0]['exercices']
+
+    def active_days(self) -> list:
+        data_list = self.get_exercices()
+        current_month = datetime.now().month
+        days_found = set()
+
+        for entry in data_list:
+            timestamp = entry.get('timestamp', 0)
+            date_object = datetime.fromtimestamp(timestamp)
+
+            if date_object.month == current_month:
+                days_found.add(date_object.day)
+
+        return sorted(days_found)
 
 
 class Exercice:

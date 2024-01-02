@@ -30,8 +30,9 @@ def workout(workout_id):
     return render_template('workout.html')
 
 
-@app.route('/api/<username>/workouts')
-def get_workouts(username):
+@app.route('/api/workouts')
+def get_workouts():
+    username = request.cookies.get('username')
     return {'success': True, 'data': [workout.to_json() for workout in database.get_workouts(username=username)]}
 
 
@@ -39,7 +40,11 @@ def get_workouts(username):
 def get_workout(workout_id):
     username = request.cookies.get('username')
     user = database.get_user(username=username)
-    return {'success': True, 'data': database.get_workout(user, workout_id=workout_id)}
+    try:
+        return {'success': True, 'data': database.get_workout(user, workout_id=workout_id)}
+    except IndexError:
+        # IndexError: when exercice id is not found (deleted)
+        return {'success': False}
 
 
 @app.route('/<username>')
@@ -64,6 +69,7 @@ def addNewExercice():
             {"$push": {"exercices": {'id': id, 'reps': 13, 'sets': 3, 'weight': 0}}})
         return {'success': True, 'id': id}
     else:
+        # update exercice already in workout
         workout = database.workouts.find_one({"id": int(data['workout'])})
         exercise_id = data['id']
         if workout:
@@ -117,6 +123,17 @@ def editWorkout():
     database.workouts.update_one({'id': data['id']}, {'$set': data})
     print(data)
     return {'success': True}
+
+
+@app.route('/api/allExercices')
+def allExercices():
+    exercices = database.get_exercices()
+    return {'success': True, 'data': exercices}
+
+
+@app.route('/api/user_data/active_days/<username>')
+def active_days(username):
+    return {'success': True, 'data': database.get_user(username=username).active_days()}
 
 
 if __name__ == '__main__':
