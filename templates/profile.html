@@ -19,14 +19,19 @@
       align-items: center;
       border-radius: 50%;
       cursor: pointer;
-
-      border: solid rgba(0, 0, 0, 0.336) 1px;
       border-radius: 100%;
     }
     .day.active {
       background-color: #fed42c;
       color: black;
-      border: solid 1px gray;
+    }
+    .day.recup{
+      -webkit-box-shadow: inset 0px 0px 20px -1px rgba(0,0,0,0.75);
+      -moz-box-shadow: inset 0px 0px 20px -1px rgba(0,0,0,0.75);
+      box-shadow: inset 0px 0px 23px -1px rgba(0,0,0,0.75);
+    }
+    .day.today{
+      border:solid 2px white;
     }
   </style>
 </head>
@@ -58,8 +63,19 @@
           for (let day = 1; day <= daysInMonth + startingDay; day++) {
             const dayElement = document.createElement('div');
             dayElement.classList.add('day');
-            if ((day - startingDay) in data['data']){
+            dayElement.id = day - startingDay
+            if (startingDay == day - startingDay){
+              dayElement.classList.add('today')
+            }
+            if (data['data'].includes(day - startingDay)){
               dayElement.classList.add('active');
+              var recup = true;
+            }
+            else{
+              if (recup){
+                dayElement.classList.add('recup') 
+              }
+              recup = false;
             }
     
     
