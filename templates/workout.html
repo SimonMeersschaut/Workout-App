@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/api/file/style.css">
 </head>
 <body>
-  <h1 id="workout-name" style="display:inline">-Workout Name-</h1>
+  <h1 id="workout-name" style="display:inline"></h1>
   <button style="display:inline; margin-left: 20px; background-color: transparent;color: white; border:solid 1px white; font-size: 17px; padding: 5px" onclick="switchEdit()">Edit</button>
   <div id="exercices-container" class="item-container">
     
@@ -45,7 +45,7 @@
       .then(resp => resp.json())
       .then(response => response['data'])
       .then(data => {
-        document.getElementById('workout-name').innerText = data['name'];
+        document.getElementById('workout-name').innerText = data['title'];
         var parent = document.getElementById('exercices-container')
         console.log(data)
         innerHTML = ''

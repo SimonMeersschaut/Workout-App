@@ -10,7 +10,10 @@
   <h1>Workouts</h1>
   <div id="workouts-container" class="item-container">
   </div>
-  <button id="workout-add-button" onclick="addWorkout()">+</button>
+  <div id="action-container">
+    <button id="workout-add-button" onclick="addWorkout()">+</button>
+    <!-- <button id="edit" onclick="workoutEdit()">Edit</button> -->
+  </div>
 
   <div class="navbar">
     <a href='/'>
@@ -23,16 +26,37 @@
   
   <script src="/api/file/script.js"></script>
   <script src="/api/file/workouts.js"></script>
+  <script src="/api/file/popups.js"></script>
   <script>
     function addWorkout(){
+      showPopup('<h2>Workout Type</h2><br><button onclick="createNewWorkout()" class="filled">Saved</button><button onclick="createTemporaryWorkout()" class="filled">Temproary</button>')
+    }
+    function createNewWorkout(){
       fetch('/api/addWorkout', {
         method: 'POST'
       })
       .then(response => response.json())
       .then(data => {
           renderWorkouts([{'name':'New Workout', 'description': 'Your new personal workout.'}])
-        })
+          hidePopup()
+      })
+    }
+    function createTemporaryWorkout(){
+      alert('Temproray Workouts are not supported yet')
+    }
+    function workoutEdit(){
+      var editing;
+      if (editing){
+        alert('already editing')
       }
+      else{
+        document.getElementById('action-container').style.display = 'none'
+        var workouts = document.getElementById('workouts-container').getElementsByTagName('div');
+        for (let i=0; i<workouts.length; i++){
+          console.log(workouts[i])
+        }
+      }
+    }
     function loadWorkouts(){
       fetch('/api/Simon/workouts')
       .then(resp => resp.json())

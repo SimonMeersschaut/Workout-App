@@ -7,7 +7,7 @@ body {
   background-color: #20242A;
   color: white;
   /* actions */
-  touch-action: none;
+  /* touch-action: none; */
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
@@ -62,19 +62,22 @@ input:active::placeholder{
   color: rgba(255, 255, 255, 0.767);
 }
 #popup-container {
-  /* display: none; */
   position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #2B3038;
-  padding: 15px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #20242A;
   min-height: 200px;
-  /* padding-bottom: 300px; temp testing */
-  box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.3);
-  z-index: 2;
-  transform:translateY(100%);
-  /* transition: transform 0.3s ease-in-out; */
+  min-width: 500px;
+  border-radius: 20px;
+  padding: 20px;
+  border: solid rgba(128, 128, 128, 0.212) 2px;
+  -webkit-box-shadow: 1px 0px 16px -2px rgba(0,0,0,0.75);
+  -moz-box-shadow: 1px 0px 16px -2px rgba(0,0,0,0.75);
+  box-shadow: 1px 0px 16px -2px rgba(0,0,0,0.75);
+}
+#popup-container:html{
+  filter:brightness(10%);
 }
 
 /* Navigation bar styling */
@@ -230,12 +233,41 @@ table.popup-items tr td:last-child {
   height: 35px;
   font-weight: bold;
   padding:0;
-  left:50%;
+  /* left:50%; */
   transform: translateX(-50%);
   cursor: pointer;
+  display: inline;
 }
 #add-exercice-button{
   border: dashed black 1px;
   text-align: center;
   cursor:pointer;
+}
+#popup-container button.filled{
+  background-color: #1b1f24;
+  margin-right: 4px;
+  padding: 50px;
+  width: 49%;
+  height:200px;
+  text-align: center;
+  border: rgba(128, 128, 128, 0.24) solid 1px;
+  color: rgb(243, 243, 243);
+  cursor: pointer;
+}
+button.edit_button{
+
+  background-color: #1b1f24;
+
+  color: rgb(189, 189, 189);
+  float:right;
+  top:0;
+  cursor:pointer;
+  /* position: absolute; */
+
+}
+div#action-container{
+  left: 50%;
+  width: fit-content;
+  position: absolute;
+  transform: translateX(-50%);
 }

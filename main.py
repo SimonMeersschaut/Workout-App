@@ -93,7 +93,7 @@ def addWorkout():
                  for workout in database.get_workouts()]) + 1
     database.workouts.insert_one({
         'username': username,
-        'name': 'New Workout',
+        'title': 'New Workout',
         'exercices': [],
         'description': 'A new workout',
         'id': new_id
@@ -108,6 +108,14 @@ def submitExercice():
     data = request.get_json(force=True)
     data['workout_id'] = int(data['workout_id'])
     user.register_exercice(**data)
+    return {'success': True}
+
+
+@app.route('/api/editWorkout', methods=['POST'])
+def editWorkout():
+    data = request.get_json(force=True)
+    database.workouts.update_one({'id': data['id']}, {'$set': data})
+    print(data)
     return {'success': True}
 
 

@@ -19,15 +19,50 @@ function createElementFromHTML(htmlString) {
   return div.firstChild;1
 }
 
-function addItem(parent, onclick, title, description) {
-  element = createElementFromHTML(`<div><h2>${title}</h2>\
+function addItem(id, parent, onclick, onedit, title, description) {
+  element = createElementFromHTML(`<div id="${id}">
+  ${onedit ? `<button class="edit_button">edit</button>` : ""}
+  <h2>${title}</h2>\
   ${description ? `<span>${description}</span>` : ""}
     </div>`);
-  if (onclick) {
-    element.onclick = onclick;
-    element.style.cursor = "pointer";
-  }
+  // if (onclick) {
+    // element.onclick = onclick;
+    // element.style.cursor = "pointer";
+  // }
+  element.addEventListener('click', (e) => {
+    // alert('editing now')
+    console.log(e.target)
+    if (e.target.classList.contains('edit_button')){
+      showPopup(`
+        <div>
+        <input id="editWorkoutTitle" style="width: 150px;" placeholder="name" value="${title}">
+        <input id="editWorkoutDescirption" style="width: 150px;" placeholder="name" value="${description}">
+        <br><br>
+        <button onclick="saveEdit(${id})">Save</button>
+        </div>`
+      )
+    }
+    else{
+      onclick()
+    }
+  })
   parent.appendChild(element);
+}
+function saveEdit(id){
+  title = document.getElementById('editWorkoutTitle').value;
+  description = document.getElementById('editWorkoutDescirption').value;
+  fetch('/api/editWorkout', {
+    method: 'POST',
+    body: JSON.stringify({'id': id, 'title': title, 'description': description})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data['success'] == true){
+      window.location.reload()
+    }else{
+      // alert('error')
+    }
+  })
 }
 function addExercice(parent, data) {
   element = createElementFromHTML(`\
@@ -101,6 +136,7 @@ function SubmitExercice(id) {
         for (let i=0; i<exercices.length; i++){
           if (exercices[i].id == id){
             exercices[i].classList.add('done')
+            return; // repititions should not be marked
             // setTimeout(() => {exercices[i].remove()}, 1900)
           }
         }
