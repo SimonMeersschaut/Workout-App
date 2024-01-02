@@ -5,9 +5,15 @@ var popup;
 popup = document.getElementById("popup-container");
 
 function showPopup(dom) {
+  //remove all pupups
+  popups = document.getElementsByClassName('popup')
+  for (let i=0; i<popups.length; i++){
+    popups[i].remove()
+  }
   popup = document.createElement("div");
   popup.innerHTML = dom;
   popup.id = "popup-container";
+  popup.classList.add('popup')
   popup.ontouchstart = handleTouchStart;
   popup.ontouchmove = handleTouchMove;
   popup.ontouchend = handleTouchEnd;
@@ -19,17 +25,12 @@ function showPopup(dom) {
 }
 
 function hidePopup() {
-  popup.style.transform = "translateY(100%)";
-  setTimeout(() => {
-    popup.remove();
-  }, 300);
+  popup.remove();
 }
 
 function handleTouchStart(event) {
+  deltaY = 0;
   initialTouchY = event.touches[0].clientY;
-  if (initialTouchY > popup.offsetTop + 20) {
-    initialTouchY = null; // Reset if not within the top 20px
-  }
 }
 
 function handleTouchMove(event) {
@@ -40,13 +41,12 @@ function handleTouchMove(event) {
     var string = "translateY(" + -deltaY + "px)";
     popup.style.transform = string;
   }
-
-  if (deltaY < 0 && Math.abs(deltaY) > swipeThreshold) {
-    hidePopup();
-  }
 }
 
 function handleTouchEnd() {
+  if (deltaY < 0 && Math.abs(deltaY) > swipeThreshold) {
+    hidePopup();
+  }
   if (
     initialTouchY !== null &&
     !(deltaY < 0 && Math.abs(deltaY) > swipeThreshold)

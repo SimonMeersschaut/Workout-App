@@ -4,52 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Workout Website</title>
-  <link rel="stylesheet" href="/file/style.css">
+  <link rel="stylesheet" href="/api/file/style.css">
 </head>
 <body>
-  <h1>Profile</h1>
+  <h1 id="workout-name">Profile</h1>
+  <div id="exercices-container" class="item-container">
+  </div>
   <div class="navbar">
-    <button onclick="Workouts()">
-      <img src="/file/dumbell.svg" alt="Workouts">
-    </button>
-    <button onclick="Profile()">
-      <img src="/file/profile.svg" alt="Profile">
+    <a href='/'>
+      <img src="/api/file/dumbell.svg" alt="Workouts">
+    </a>
+    <button onclick="window.location.href = '/' + getCookie('username')">
+      <img src="/api/file/profile.svg" alt="Profile">
     </button>
   </div>
-
   
-  <script src="/file/script.js"></script>
-  <script src="/file/popups.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-  makePickerScrollable("hourPicker");
-  makePickerScrollable("minutePicker");
-});
-
-function makePickerScrollable(pickerId) {
-  const pickerWindow = document.getElementById(pickerId);
-  let isMouseDown = false;
-  let startY;
-  let scrollY;
-
-  pickerWindow.addEventListener("mousedown", (e) => {
-    isMouseDown = true;
-    startY = e.clientY - pickerWindow.getBoundingClientRect().top;
-    scrollY = pickerWindow.scrollTop;
-  });
-
-  document.addEventListener("mousemove", (e) => {
-    if (!isMouseDown) return;
-    const newY = e.clientY - pickerWindow.getBoundingClientRect().top;
-    const deltaY = newY - startY;
-    pickerWindow.scrollTop = scrollY + deltaY;
-  });
-
-  document.addEventListener("mouseup", () => {
-    isMouseDown = false;
-  });
-}
-
-  </script>
+  <script src="/api/file/script.js"></script>
+  <script src="/api/file/popups.js"></script>
   </body>
 </html>

@@ -4,76 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Workout Website</title>
-  <link rel="stylesheet" href="/file/style.css">
+  <link rel="stylesheet" href="/api/file/style.css">
 </head>
 <body>
-  <h1>Exercices</h1>
-  <div id="exercices-container">
+  <h1 id="workout-name" style="display:inline">-Workout Name-</h1>
+  <button style="display:inline; margin-left: 20px; background-color: transparent;color: white; border:solid 1px white; font-size: 17px; padding: 5px" onclick="switchEdit()">Edit</button>
+  <div id="exercices-container" class="item-container">
     
+  </div>
+  <div class="item-container">
+    <div onclick="addNewExercice()" id="add-exercice-button">
+      Add Exercice
+    </div>
   </div>
   <div class="navbar">
-    <button onclick="Workouts()">
-      <img src="/file/dumbell.svg" alt="Workouts">
-    </button>
-    <button onclick="Profile()">
-      <img src="/file/profile.svg" alt="Profile">
+    <a href='/'>
+      <img src="/api/file/dumbell.svg" alt="Workouts">
+    </a>
+    <button onclick="window.location.href = '/' + getCookie('username')">
+      <img src="/api/file/profile.svg" alt="Profile">
     </button>
   </div>
-  
-  <div class='button-container'>
-  </div>
-  
-  <script src="/file/script.js"></script>
-  <script src="/file/popups.js"></script>
+  <script src="/api/file/script.js"></script>
+  <script src="/api/file/popups.js"></script>
   <script>
-    function SubmitExercice(id){
-      popup = document.getElementById('popup-container')
-      fetch('/submitExercice', {
-        method: "POST",
-        body: JSON.stringify({"id":id}),
-      })
-      hidePopup()
+    var isEditing = false;
+    function switchEdit(){
+      isEditing = !isEditing;
+      element = document.getElementById('submitButton')
+      if (isEditing){
+        document.body.classList.add('edit')
+        element.innerText = 'Edit'
+      }else{
+        document.body.classList.remove('edit')
+        element.innerText = 'Done'
+      }
     }
-    function showWorkoutPopup(reps, weight, id){
-      dom = '<div>\
-      <h2>Shoulder press</h2>\
-      <input id="reps" placeholder="'+reps+'" type="tel" \> x <input id="reps" placeholder="'+ weight+'" type="tel" \>kg\
-      <button style="width:calc(100% - 65px); bottom:10px; position:absolute; display:block;" onclick="SubmitExercice(' + id + ')">Done</button>\
-      </div>'
-      showPopup(dom);
-    }
-    
     function loadExercices(){
-      fetch('/my-exercices')
+      fetch('/api/workouts/'+last_segment())
       .then(resp => resp.json())
+      .then(response => response['data'])
       .then(data => {
+        document.getElementById('workout-name').innerText = data['name'];
+        var parent = document.getElementById('exercices-container')
         console.log(data)
         innerHTML = ''
         for (let i=0; i<data['exercices'].length; i++){
-          console.log(data['exercices'][i])
-
-          items = ''
-          for (const [key, value] of Object.entries(data['exercices'][i])) {
-            if (value != null){
-              if (false){
-                header = '<span>1RM</span><br>'
-              }else{
-                header = ''
-              }
-              main_field = '<span>' + value + '</span>'
-              items = items + '<td class="info-field">'+main_field+'</td>'
-            }
-          }
-          innerHTML = innerHTML + '\
-          <div class="exercise" onclick="showWorkoutPopup(13, 20, '+ data['exercices'][i]['id'] +')">\
-            <h2>' + data['exercices'][i]['name'] +'</h2>\
-            <table class="additional-info">\
-              ' + items + '\
-            </table>\
-          </div>'
+          let exercice = data['exercices'][i]
+          console.log(exercice)
+          addExercice(
+            parent,
+            exercice
+          )
         }
-        document.getElementById('exercices-container').innerHTML = innerHTML
-      });
+      })
     }
     loadExercices()
   </script>

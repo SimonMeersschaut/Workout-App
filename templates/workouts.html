@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Website</title>
+  <link rel="stylesheet" href="/api/file/style.css">
+</head>
+<body>
+  <h1>Workouts</h1>
+  <div id="workouts-container" class="item-container">
+  </div>
+  <button id="workout-add-button" onclick="addWorkout()">+</button>
+
+  <div class="navbar">
+    <a href='/'>
+      <img src="/api/file/dumbell.svg" alt="Workouts">
+    </a>
+    <button onclick="window.location.href = '/' + getCookie('username')">
+      <img src="/api/file/profile.svg" alt="Profile">
+    </button>
+  </div>
+  
+  <script src="/api/file/script.js"></script>
+  <script src="/api/file/workouts.js"></script>
+  <script>
+    function addWorkout(){
+      fetch('/api/addWorkout', {
+        method: 'POST'
+      })
+      .then(response => response.json())
+      .then(data => {
+          renderWorkouts([{'name':'New Workout', 'description': 'Your new personal workout.'}])
+        })
+      }
+    function loadWorkouts(){
+      fetch('/api/Simon/workouts')
+      .then(resp => resp.json())
+      .then(response => response['data'])
+      .then(workouts => {
+        renderWorkouts(workouts)
+      })
+    }
+    loadWorkouts()
+
+  </script>
+</body>
+</html>

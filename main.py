@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
-import json
-from user import User
-
+from flask import Flask, render_template, request, Response
+from database import database
+from bson import ObjectId
 app = Flask(__name__, template_folder='templates')
 
 
-@app.route('/file/<filename>')
+@app.route('/api/file/<filename>')
 def render_file(filename):
     match filename.split('.')[-1]:
         case 'css':
@@ -21,38 +20,95 @@ def render_file(filename):
 
 
 @app.route('/')
-@app.route('/workout')
-def workout():
-    # Render a page with a list of available workouts
-    # You can retrieve workout data from a database or another source
-    # and pass it to the template for rendering
+@app.route('/<username>/workouts')
+def workouts(username=None):
+    return render_template('workouts.html')
+
+
+@app.route('/workouts/<workout_id>')
+def workout(workout_id):
     return render_template('workout.html')
 
 
-@app.route('/profile')
-def profile():
+@app.route('/api/<username>/workouts')
+def get_workouts(username):
+    return {'success': True, 'data': [workout.to_json() for workout in database.get_workouts(username=username)]}
+
+
+@app.route('/api/workouts/<int:workout_id>')
+def get_workout(workout_id):
+    username = request.cookies.get('username')
+    user = database.get_user(username=username)
+    return {'success': True, 'data': database.get_workout(user, workout_id=workout_id)}
+
+
+@app.route('/<username>')
+def profile(username):
     return render_template('profile.html')
 
 
-@app.route('/workout/<int:workout_id>')
-def workout_detail(workout_id):
-    # Render a page with details for a specific workout
-    # You can retrieve detailed workout data based on workout_id
-    # and pass it to the template for rendering
-    workout_details = {...}  # Replace with actual workout details
-    return render_template('workout_detail.html', workout=workout_details)
+@app.route('/api/addNewExercice', methods=['POST'])
+def addNewExercice():
+    data = request.get_json(force=True)
+    if 'name' in data:
+        # new exercice
+        if len(database.get_exercices(name=data['name'])) == 0:
+            # does not exist
+            id = max([ex['id'] for ex in database.get_exercices()]) + 1
+            database.exercices.insert_one({'name': data['name'], 'id': id})
+        else:
+            # does already exist
+            id = database.get_exercices(name=data['name'])[0]['id']
+        database.workouts.update_one(
+            {"id": int(data['workout'])},
+            {"$push": {"exercices": {'id': id, 'reps': 13, 'sets': 3, 'weight': 0}}})
+        return {'success': True, 'id': id}
+    else:
+        workout = database.workouts.find_one({"id": int(data['workout'])})
+        exercise_id = data['id']
+        if workout:
+            for exercise in workout["exercices"]:
+                if exercise["id"] == exercise_id:
+                    # Update the reps, sets, and weight
+                    exercise["reps"] = data['reps']
+                    exercise["sets"] = data['sets']
+                    exercise["weight"] = data['weight']
+
+                    # Update the document in the collection
+                    database.workouts.update_one({"_id": ObjectId(workout['_id'])}, {
+                        "$set": {"exercices": workout["exercices"]}})
+
+                    print("Workout item updated successfully.")
+                    return {'success': True}
+            print("Exercise not found in the workout.")
+        else:
+            print("Workout not found.")
+        return {'success': False}
 
 
-@app.route('/my-exercices')
-def my_exercices():
-    my_user = User()
-    return {"success": True, "exercices": my_user.get_my_exercices()}
+@app.route('/api/addWorkout', methods=['POST'])
+def addWorkout():
+    username = request.cookies.get('username')
+    new_id = max([workout.to_json()['id']
+                 for workout in database.get_workouts()]) + 1
+    database.workouts.insert_one({
+        'username': username,
+        'name': 'New Workout',
+        'exercices': [],
+        'description': 'A new workout',
+        'id': new_id
+    })
+    return {'success': True}
 
 
-@app.route('/submitExercice', methods=['POST'])
+@app.route('/api/submitExercice', methods=['POST'])
 def submitExercice():
-    print(request.get_json(force=True))
-    return {'success': True, 'status': 'ok'}
+    username = request.cookies.get('username')
+    user = database.get_user(username=username)
+    data = request.get_json(force=True)
+    data['workout_id'] = int(data['workout_id'])
+    user.register_exercice(**data)
+    return {'success': True}
 
 
 if __name__ == '__main__':
