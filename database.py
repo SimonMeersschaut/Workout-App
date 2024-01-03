@@ -54,9 +54,13 @@ class Database:
             # len == 0 | len > 1
             return {}
 
-    def register_exercice(self, username, exercice_id, weight, sets, reps, workout_id):
+    def register_exercice(self, username, exercice_name=None, exercice_id=None, weight=None, sets=None, reps=None, workout_id=None, timestamp: int = None):
+        if timestamp is None:
+            timestamp = int(time.time())
+        if (exercice_id is None and exercice_name is not None):
+            exercice_id = database.get_exercice(name=exercice_name)['id']
         new_exercice_item = {
-            'id': int(exercice_id), "timestamp": int(time.time()),
+            'id': int(exercice_id), "timestamp": timestamp,
             'weight': weight, 'sets': sets, 'reps': reps,
             'workout_id': workout_id
         }
@@ -75,9 +79,9 @@ class User:
         self.username = username
         self.db = db
 
-    def register_exercice(self, id=None, weight=None, sets=None, reps=None, workout_id=None):
+    def register_exercice(self, **kwargs):
         self.db.register_exercice(
-            self.username, id, weight, sets, reps, workout_id)
+            username=self.username, **kwargs)
 
     def get_exercices(self) -> list:
         return self.db.users.find({'name': self.username})[0]['exercices']

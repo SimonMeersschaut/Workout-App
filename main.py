@@ -112,7 +112,10 @@ def submitExercice():
     username = request.cookies.get('username')
     user = database.get_user(username=username)
     data = request.get_json(force=True)
-    data['workout_id'] = int(data['workout_id'])
+    if data['workout_id'] is None:
+        data['workout_id'] = None
+    else:
+        data['workout_id'] = int(data['workout_id'])
     user.register_exercice(**data)
     return {'success': True}
 

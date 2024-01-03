@@ -1,5 +1,6 @@
 const currentNumbers = { selector1: 0, selector2: 0, selector3: 0 };
 var allExercices = []
+var isEditing = false;
 
 function addExercice(parent, data) {
   element = createElementFromHTML(`\
@@ -11,7 +12,7 @@ function addExercice(parent, data) {
         <td class="info-field"><span class="header">reps</span><br><span>${data['reps']}</span></td>\
       </table>\
   </div>`);
-  element.onclick = () => showWorkoutPopup(data);
+  element.onclick = () => showWorkoutPopup(data, (id) => {SubmitExercice(id)});
   element.style.cursor = "pointer";
   parent.appendChild(element);
 }
@@ -56,7 +57,7 @@ function SubmitExercice(id) {
     fetch("/api/submitExercice", {
       method: "POST",
       body: JSON.stringify({
-        id: id,
+        exercice_id: id,
         weight: weight,
         sets: sets,
         reps: reps,
@@ -83,7 +84,7 @@ function SubmitExercice(id) {
 }
 
 
-function showWorkoutPopup(data) {
+function showWorkoutPopup(data, onSubmit) {
   currentNumbers["selector1"] = data['weight']
   currentNumbers["selector2"] = data['sets']
   currentNumbers["selector3"] = data['reps']
@@ -114,8 +115,14 @@ function showWorkoutPopup(data) {
         <button onclick="updateNumber('selector3', 1)">+</button>
       </td>
     </tr>\
-  </table><button id="submitButton" onclick="SubmitExercice(${data['id']})" style="margin-top: 20px; width: calc(100% - 25px);">${(isEditing) ? 'Edit' : 'Done'}</button>`;
+  </table><button id="submitButton" style="margin-top: 20px; width: calc(100% - 25px);">${(isEditing) ? 'Edit' : 'Done'}</button>`;
   showPopup(dom);
+  document.getElementById('submitButton').onclick = () => {
+    weight = currentNumbers["selector1"]
+    sets = currentNumbers["selector2"]
+    reps = currentNumbers["selector3"]
+    onSubmit(data['id'], weight, sets, reps)
+  }
 }
 
 
@@ -146,11 +153,14 @@ function ExercicePopup(onFound){
     `<div>
       <h2>Find Exercice</h2>
       <br>
-      <input id="SearchEntry" onkeyup="updateSearch(${onFound})" style="width: 150px">
+      <input id="SearchEntry" style="width: 150px">
       <button id="addCustomExerciceButton">+</button>
       <div id="SearchResultContainer">
       </div>
     </div>`)
+    document.getElementById('SearchEntry').oninput = () => {
+      updateSearch(onFound)
+    }
     document.getElementById('addCustomExerciceButton').onclick = () => {
       value = document.getElementById('SearchEntry').value;
       onFound(value)

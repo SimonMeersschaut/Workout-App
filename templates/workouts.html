@@ -27,9 +27,13 @@
   <script src="/api/file/script.js"></script>
   <script src="/api/file/workouts.js"></script>
   <script src="/api/file/popups.js"></script>
+  <!--Exercice Search-->
+  <script src="/api/file/workout.js"></script>
+  <script src="/api/file/search.js"></script>
+  <!---->
   <script>
     function addWorkout(){
-      showPopup('<h2>Workout Type</h2><br><button onclick="createNewWorkout()" class="filled">Saved</button><button onclick="createTemporaryWorkout()" class="filled">Temproary</button>')
+      showPopup('<h2>Workout Type</h2><br><button onclick="createNewWorkout()" class="filled">Saved</button><button onclick="(() => {logExercicesList = []; LogExercices()})()" class="filled">Log Exercices</button>')
     }
     function createNewWorkout(){
       fetch('/api/addWorkout', {
@@ -41,8 +45,43 @@
           hidePopup()
       })
     }
-    function createTemporaryWorkout(){
-      alert('Temproray Workouts are not supported yet')
+    var logExercicesList = []
+    function LogExercices(){
+      showPopup(`
+      <h2>Log Exercices</h2>
+      <input id="dateSelector" style="width: 180px" type="date" />
+      <br><br>
+      <button onclick="LogExerciceNext()">Add Exercice</button>
+      <br>
+      <span id="exercices-list-span"></span>
+      `)
+      if (logExercicesList.length > 0){
+        document.getElementById('exercices-list-span').innerText = '- ' + logExercicesList.join('\n')
+      }
+    }
+    function LogExerciceNext(){
+      var date = Math.floor(new Date(document.getElementById('dateSelector').value).getTime() / 1000);
+      console.log(date)
+      exercice = ExercicePopup((name) => {
+        showWorkoutPopup({'name': name, 'weight':0, 'reps': 13, 'sets': 3}, (weight, sets, reps) => {
+          logExercicesList.push(name)
+          fetch("/api/submitExercice", {
+            method: "POST",
+            body: JSON.stringify({
+              'exercice_name': name,
+              'weight': weight,
+              'sets': sets,
+              'reps': reps,
+              'timestamp': date,
+              'workout_id': null
+            }),
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            LogExercices()
+          })
+        })
+      })
     }
     function workoutEdit(){
       var editing;
