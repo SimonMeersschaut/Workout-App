@@ -96,6 +96,23 @@ class User:
 
         return sorted(days_found)
 
+    def prs(self) -> list:
+        prs = {}
+
+        data_list = self.get_exercices()
+        for exercice in data_list:
+            if not (exercice['id'] in prs):
+                if exercice['weight'] != 0:
+                    # do not include calesthenics
+                    name = database.get_exercice(
+                        id=exercice['id'])['name']
+                    prs.update(
+                        {exercice['id']: {'type': 'weight', 'value': exercice['weight'], 'name': name}})
+            else:
+                prs[exercice['id']]['value'] = max(
+                    exercice['weight'], prs[exercice['id']]['value'])
+        return prs
+
 
 class Exercice:
     def __init__(self, data):

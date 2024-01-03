@@ -136,5 +136,10 @@ def active_days(username):
     return {'success': True, 'data': database.get_user(username=username).active_days()}
 
 
+@app.route('/api/user_data/prs/<username>')
+def prs(username):
+    return {'success': True, 'data': database.get_user(username=username).prs()}
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

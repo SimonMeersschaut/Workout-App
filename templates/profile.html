@@ -17,22 +17,38 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      border-radius: 50%;
       cursor: pointer;
       border-radius: 100%;
     }
     .day.active {
-      background-color: #fed42c;
-      color: black;
+      background-color: #c0a124;
+      color: rgb(66, 66, 66);
     }
     .day.recup{
       -webkit-box-shadow: inset 0px 0px 20px -1px rgba(0,0,0,0.75);
       -moz-box-shadow: inset 0px 0px 20px -1px rgba(0,0,0,0.75);
       box-shadow: inset 0px 0px 23px -1px rgba(0,0,0,0.75);
+      color: gray;
     }
     .day.today{
       border:solid 2px white;
+      
     }
+    #streak{
+      white-space: nowrap;
+    }
+    table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        th, td {
+            /* border: 1px solid #dddddd; */
+            border-bottom: solid 1px rgba(255, 255, 255, 0.651);
+            text-align: left;
+            padding: 8px;
+        }
   </style>
 </head>
 <body>
@@ -47,51 +63,27 @@
       <img src="/api/file/profile.svg" alt="Profile">
     </button>
   </div>
-  <div id="calendar"></div>
+  <div id="calendar">
+    <h2 id="streak">Streak</h2>
+  </div>
+  <div id="PRs">
+    <h2>PRs</h2>
+    <table id="myTable">
+      <thead>
+      </thead>
+      <tbody>
+          <!-- Table body will be dynamically populated -->
+      </tbody>
+  </table>
+  </div>
   
   <script src="/api/file/script.js"></script>
   <script src="/api/file/popups.js"></script>
+  <script src="/api/file/profile.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      fetch('/api/user_data/active_days/'+last_segment())
-      .then(response => response.json())
-      .then(data => {
-          const calendarContainer = document.getElementById('calendar');
-          const daysInMonth = 31; // Set the number of days in the month
-          const startingDay = new Date().getDay(); // Get the current day of the week
-    
-          for (let day = 1; day <= daysInMonth + startingDay; day++) {
-            const dayElement = document.createElement('div');
-            dayElement.classList.add('day');
-            dayElement.id = day - startingDay
-            if (startingDay == day - startingDay){
-              dayElement.classList.add('today')
-            }
-            if (data['data'].includes(day - startingDay)){
-              dayElement.classList.add('active');
-              var recup = true;
-            }
-            else{
-              if (recup){
-                dayElement.classList.add('recup') 
-              }
-              recup = false;
-            }
-    
-    
-            if (day > startingDay) {
-              dayElement.textContent = day - startingDay;
-            }
-    
-            // Ensure that Monday is considered the first day of the week
-            const adjustedDay = (day + 5) % 7;
-            dayElement.style.gridColumn = adjustedDay === 0 ? 7 : adjustedDay;
-    
-            // You can add additional logic or events here
-    
-            calendarContainer.appendChild(dayElement);
-          }
-        });
+      load_calendar()
+      load_prs()
     })
     </script>
   </body>
