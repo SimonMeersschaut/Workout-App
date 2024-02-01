@@ -10,6 +10,10 @@ def parse_json(data):
     return json.loads(json_util.dumps(data))
 
 
+def remove_duplicates(data: list):
+    print(data)
+    return [dict(t) for t in set(tuple(sorted(d.items())) for d in data)]
+
 class Database:
     def __init__(self):
         self.uri = "mongodb+srv://WorkoutApp:M3KPJFbpWSxuAoOX@workout-cluser.a7drput.mongodb.net/?retryWrites=true&w=majority"
@@ -114,7 +118,7 @@ class User:
                 if not (exercice['id'] in prs):
                     # create new
                     prs.update({exercice['id']: update_dict})
-                elif exercice['weight'] > prs[exercice['id']]['value']:
+                elif (exercice['weight'] is not None and prs[exercice['id']]['value'] is not None) and exercice['weight'] > prs[exercice['id']]['value']:
                     # update existing item
                     prs.update({exercice['id']: update_dict})
         return prs
@@ -127,17 +131,27 @@ class Exercice:
     def to_json(self, user=None, workout_id=None):
         if user and workout_id:
             self.data['done'] = False
-            for exercice in user.get_exercices():
+            try:
+                user_exercices = user.get_exercices()
+            except IndexError:
+                # no exercices found in MongoDB
+                user_exercices = []
+                # return self.data
+            for exercice in user_exercices:
                 exer = bool(exercice['id'] == self.data['id'])
-                if exercice['workout_id'] is None:
-                    workout = True
-                else:
-                    workout = bool(
-                        int(exercice['workout_id']) == int(workout_id))
-                time_diff = bool(
-                    time.time() - exercice['timestamp'] < 24*60*60)
-                if exer and workout and time_diff:
-                    self.data['done'] = True
+                if exer:
+                    # if right exercice
+                    if exercice['workout_id'] is None:
+                        # if exercice was out of any workout, count it
+                        workout = True
+                    else:
+                        workout = bool(
+                            int(exercice['workout_id']) == int(workout_id))
+                    time_diff = bool(
+                        time.time() - exercice['timestamp'] < 24*60*60)
+                    self.data.update({'reps': exercice['reps'], 'sets': exercice['sets'], 'weight': exercice['weight']})
+                    if workout and time_diff:
+                        self.data['done'] = True
         global_data = database.exercices.find({'id': self.data['id']})[0]
         self.data.update(global_data)
         try:
@@ -148,12 +162,14 @@ class Exercice:
 
 
 class Workout:
-    def __init__(self, data):
+    def __init__(self, data, auto_set=True):
+        self.auto_set = auto_set # automatically set the weight to the last one
         self.data = data
         self.exercices = data['exercices']
 
     def to_json(self, user=None):
         self.data['exercices'] = sorted(self.load_exercices(user), key=lambda exercice: exercice['name'])
+        self.data['exercices'] = remove_duplicates(self.data['exercices'])
         try:
             del self.data['_id']
         except KeyError:

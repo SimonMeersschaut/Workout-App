@@ -43,11 +43,11 @@ def get_workouts():
 def get_workout(workout_id):
     username = request.cookies.get('username')
     user = database.get_user(username=username)
-    try:
-        return {'success': True, 'data': database.get_workout(user, workout_id=workout_id)}
-    except IndexError:
-        # IndexError: when exercice id is not found (deleted)
-        return {'success': False}
+    # try:
+    return {'success': True, 'data': database.get_workout(user, workout_id=workout_id)}
+    # except IndexError:
+    #     # IndexError: when exercice id is not found (deleted)
+    #     return {'success': False}
 
 
 @app.route('/<username>')

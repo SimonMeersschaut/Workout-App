@@ -135,11 +135,7 @@ input:active::placeholder{
 /* ITEM */
 /*      */
 .additional-info{
-  /* float: right; */
-  /* row-gap:20px; */
-  column-gap: 150px;
-  /* border-collapse: separate; */
-  border-spacing: 10px;
+  float: right;
 }
 .info-field{
   /* background-color: #20242A; */

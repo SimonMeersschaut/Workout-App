@@ -6,7 +6,7 @@ function addExercice(parent, data) {
   element = createElementFromHTML(`\
   <div class="exercice ${(data['done'] == true) ? 'static-done' : ''}" id="${data['id']}">\
     <h2>${data['name']}</h2>\
-    <div id="info">
+    <div class="additional-info">
       <span>${data['weight']}kg (${data['sets']}x${data['reps']})</span>
     </div>
   </div>`);
