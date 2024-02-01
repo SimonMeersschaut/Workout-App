@@ -2,46 +2,48 @@ function load_calendar(){
   fetch('/api/user_data/active_days/'+last_segment())
   .then(response => response.json())
   .then(data => {
-      var streak = 0;
-      const calendarContainer = document.getElementById('calendar');
-      const daysInMonth = 31
-      const startingDay = new Date().getDay(); // Get the current day of the week
-  
-      for (let day = 1; day <= daysInMonth + startingDay; day++) {
-        current_day = day - startingDay + 1
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('day');
-        dayElement.id = current_day
-        if (startingDay == current_day){
-          dayElement.classList.add('today')
-        }
-        if (data['data'].includes(current_day)){
-          dayElement.classList.add('active');
-          streak += 1;
-          var recup = true;
-        }
-        else{
-          if (recup){
-            dayElement.classList.add('recup') 
-            streak += 1;
-          }
-          recup = false;
-        }
-  
-  
-        if (current_day > 0) {
-          dayElement.textContent = current_day;
-        }
-  
-        // Ensure that Monday is considered the first day of the week
-        const adjustedDay = (day + 5) % 7;
-        dayElement.style.gridColumn = adjustedDay === 0 ? 7 : adjustedDay;
-  
-        // You can add additional logic or events here
-  
-        calendarContainer.appendChild(dayElement);
-        document.getElementById('streak').innerText = `Streak: ${streak}`;
+    const calendarContainer = document.getElementById('calendar');
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const daysInMonth = new Date(currentDate.getFullYear(), currentMonth + 1, 0).getDate();
+    const startingDay = new Date(currentDate.getFullYear(), currentMonth, 1).getDay();
+    const today = new Date().getDay()
+    streak = 0
+    recup = false
+    for (let day = 1; day <= daysInMonth + startingDay; day++) {
+      const dayElement = document.createElement('div');
+      dayElement.classList.add('day');
+      current_day = day - startingDay;
+      if (day > startingDay) {
+        dayElement.textContent = current_day;
       }
+      /* Styling */
+      if (recup){
+        dayElement.classList.add('recup')
+      }
+      if (today == current_day){
+        dayElement.classList.add('today')
+      }
+      if (data['data'].includes(current_day)){
+        dayElement.classList.add('active')
+        streak += 1
+        recup = true
+      }else{
+        if (recup){
+          streak += 1
+        }
+        recup = false;
+      }
+      /* */
+
+      // Ensure that Monday is considered the first day of the week
+      const adjustedDay = (day + 5) % 7 + 1;
+      dayElement.style.gridColumn = adjustedDay === 8 ? 1 : adjustedDay;
+
+      // You can add additional logic or events here
+
+      calendarContainer.appendChild(dayElement);
+    }
   });
 }
 function appendToTable(value1, value2) {
@@ -65,7 +67,7 @@ function load_prs(){
   .then(data => {
     console.log(data)
     for (var key in data['data']){
-      value = data['data'][key]['value']
+      value = `${data['data'][key]['value']} (${data['data'][key]['reps']})`
       name = data['data'][key]['name']
       appendToTable(name, value)
     }

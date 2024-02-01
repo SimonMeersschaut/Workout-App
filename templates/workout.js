@@ -6,11 +6,9 @@ function addExercice(parent, data) {
   element = createElementFromHTML(`\
   <div class="exercice ${(data['done'] == true) ? 'static-done' : ''}" id="${data['id']}">\
     <h2>${data['name']}</h2>\
-      <table class="additional-info">\
-        <td class="info-field active"><span class="header">weight</span><br><span>${data['weight']}</span></td>\
-        <td class="info-field"><span class="header">sets</span><br><span>${data['sets']}</span></td>\
-        <td class="info-field"><span class="header">reps</span><br><span>${data['reps']}</span></td>\
-      </table>\
+    <div id="info">
+      <span>${data['weight']}kg (${data['sets']}x${data['reps']})</span>
+    </div>
   </div>`);
   element.onclick = () => showWorkoutPopup(data, (id) => {SubmitExercice(id)});
   element.style.cursor = "pointer";
@@ -47,7 +45,7 @@ function SubmitExercice(id) {
     .then(response => response.json())
     .then(data => {
       if (data['success'] == true){
-        alert('done')
+        window.location.reload()
       }else{
         alert('error')
       }

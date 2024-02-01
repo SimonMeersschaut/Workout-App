@@ -13,6 +13,9 @@ def render_file(filename):
             mimetype = 'text/javascript'
         case 'svg':
             mimetype = 'image/svg+xml'
+        case 'png':
+            mimetype = 'image/png'
+            return render_template(filename)
         case _:
             mimetype = 'text'
     with open('templates/'+filename, 'r') as f:
@@ -113,9 +116,20 @@ def submitExercice():
     user = database.get_user(username=username)
     data = request.get_json(force=True)
     if data['workout_id'] is None:
+        # log single exercice
         data['workout_id'] = None
     else:
         data['workout_id'] = int(data['workout_id'])
+        # update workout
+        workout = database.workouts.find_one({"id": int(data['workout_id'])})
+        exercise_id = data['exercice_id']
+        for exercise in workout["exercices"]:
+            if exercise["id"] == exercise_id:
+                exercise["reps"] = data['reps']
+                exercise["sets"] = data['sets']
+                exercise["weight"] = data['weight']
+                database.workouts.update_one({"_id": ObjectId(workout['_id'])}, {
+                    "$set": {"exercices": workout["exercices"]}})
     user.register_exercice(**data)
     return {'success': True}
 
@@ -133,6 +147,8 @@ def allExercices():
     exercices = database.get_exercices()
     return {'success': True, 'data': exercices}
 
+# USER DATA #
+
 
 @app.route('/api/user_data/active_days/<username>')
 def active_days(username):
@@ -142,6 +158,13 @@ def active_days(username):
 @app.route('/api/user_data/prs/<username>')
 def prs(username):
     return {'success': True, 'data': database.get_user(username=username).prs()}
+
+# SNS #
+
+
+@app.route('/sns')
+def sns():
+    return render_template('sns.html')
 
 
 if __name__ == '__main__':

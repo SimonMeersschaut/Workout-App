@@ -54,7 +54,7 @@ class Database:
             # len == 0 | len > 1
             return {}
 
-    def register_exercice(self, username, exercice_name=None, exercice_id=None, weight=None, sets=None, reps=None, workout_id=None, timestamp: int = None):
+    def register_exercice(self, username, exercice_name=None, exercice_id=None, weight=0, sets=0, reps=0, workout_id=None, timestamp: int = None):
         if timestamp is None:
             timestamp = int(time.time())
         if (exercice_id is None and exercice_name is not None):
@@ -105,16 +105,18 @@ class User:
 
         data_list = self.get_exercices()
         for exercice in data_list:
-            if not (exercice['id'] in prs):
-                if exercice['weight'] != 0:
-                    # do not include calesthenics
-                    name = database.get_exercice(
-                        id=exercice['id'])['name']
-                    prs.update(
-                        {exercice['id']: {'type': 'weight', 'value': exercice['weight'], 'name': name}})
-            else:
-                prs[exercice['id']]['value'] = max(
-                    exercice['weight'], prs[exercice['id']]['value'])
+            if exercice['weight'] != 0:
+                # do not include calesthenics
+                name = database.get_exercice(
+                    id=exercice['id'])['name']
+                update_dict = {'type': 'weight',
+                               'value': exercice['weight'], 'name': name, 'reps': exercice['reps']}
+                if not (exercice['id'] in prs):
+                    # create new
+                    prs.update({exercice['id']: update_dict})
+                elif exercice['weight'] > prs[exercice['id']]['value']:
+                    # update existing item
+                    prs.update({exercice['id']: update_dict})
         return prs
 
 
@@ -127,7 +129,11 @@ class Exercice:
             self.data['done'] = False
             for exercice in user.get_exercices():
                 exer = bool(exercice['id'] == self.data['id'])
-                workout = bool(int(exercice['workout_id']) == int(workout_id))
+                if exercice['workout_id'] is None:
+                    workout = True
+                else:
+                    workout = bool(
+                        int(exercice['workout_id']) == int(workout_id))
                 time_diff = bool(
                     time.time() - exercice['timestamp'] < 24*60*60)
                 if exer and workout and time_diff:
@@ -147,14 +153,13 @@ class Workout:
         self.exercices = data['exercices']
 
     def to_json(self, user=None):
-        data = self.data
-        self.data['exercices'] = self.load_exercices(user)
+        self.data['exercices'] = sorted(self.load_exercices(user), key=lambda exercice: exercice['name'])
         try:
-            del data['_id']
+            del self.data['_id']
         except KeyError:
             pass
-
-        return data
+        print(self.data)
+        return self.data
 
     def load_exercices(self, user) -> list:
         return [Exercice(exercice).to_json(user, self.data['id']) for exercice in self.exercices]
