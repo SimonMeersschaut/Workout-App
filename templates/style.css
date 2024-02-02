@@ -114,11 +114,11 @@ input:active::placeholder{
 
 /* Exercise container styling */
 .item-container > div {
-  max-width: 800px;
+  max-width: 500px;
   margin: 5px auto 5px; /* Added top margin to account for the fixed navbar */
   padding: 10px;
   background-color: #2B3038;
-  border-radius: 2px;
+  border-radius: 3px;
   
 }
 .exercice > *{

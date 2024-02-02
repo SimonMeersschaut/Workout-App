@@ -4,16 +4,88 @@ var isEditing = false;
 
 function addExercice(parent, data) {
   element = createElementFromHTML(`\
-  <div class="exercice ${(data['done'] == true) ? 'static-done' : ''}" id="${data['id']}">\
+  <div class="exercice draggable ${(data['done'] == true) ? 'static-done' : ''}" id="${data['id']}">\
     <h2>${data['name']}</h2>\
     <div class="additional-info">
       <span>${data['weight']}kg (${data['sets']}x${data['reps']})</span>
     </div>
   </div>`);
-  element.onclick = () => showWorkoutPopup(data, (id) => {SubmitExercice(id)});
   element.style.cursor = "pointer";
+  // onclick = () => showWorkoutPopup(data, (id) => {SubmitExercice(id)});
+  element.addEventListener('mousedown', (event) => {startDrag(event)})
   parent.appendChild(element);
 }
+
+///////////////////
+/* START OF DRAG */
+///////////////////
+let offsetX, offsetY;
+var isDragging = false;
+let currentDraggable;
+let timePress = 0;
+var newX = 0;
+
+document.addEventListener('mousedown', startDrag);
+
+function startDrag(e) {
+  let target = e.target;
+
+  // Check if the target or any of its ancestors have the class '.draggable'
+  while (target && !target.classList.contains('draggable')) {
+      target = target.parentElement;
+  }
+
+  if (target) {
+      currentDraggable = target;
+      currentDraggable.style.transition = 'transform .1s'
+      timePress = new Date().getTime();
+      newX = 0;
+
+      // Store the initial position of the mouse pointer relative to the draggable element
+      offsetX = e.clientX// - currentDraggable.getBoundingClientRect().left;
+
+      // Set the flag to indicate dragging has started
+      isDragging = true;
+
+      // Attach the drag and mouseup event listeners
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', stopDrag);
+    }
+}
+
+function drag(e) {
+    if (isDragging) {
+        // Calculate the new horizontal position of the dragged element
+        newX = e.clientX - offsetX;
+
+        // Set the new horizontal position using the transform property
+        currentDraggable.style.transform = `translateX(${newX}px)`;
+    }
+}
+
+function stopDrag() {
+    // Reset the offset values and flag
+    currentDraggable.style.transform = `translateX(0px)`;
+    offsetX = 0;
+    offsetY = 0;
+    isDragging = false;
+    currentDraggable = null;
+    // console.log(new Date().getTime() - timePress)
+    if (new Date().getTime() - timePress < 400){
+      // short press
+      if (newX < 50){
+        // short click
+        alert('short click')
+      }
+    }
+
+    // Remove the event listeners when dragging stops
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', stopDrag);
+}
+/*             */
+/* END OF DRAG */
+/*             */
 
 function updateNumber(selectorId, change) {
   // Check if the currentNumbers object has a property for the given selector
