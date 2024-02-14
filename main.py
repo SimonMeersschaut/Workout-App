@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, Response
 from database import database
 from bson import ObjectId
+import time
 app = Flask(__name__, template_folder='templates')
 
 
@@ -162,9 +163,33 @@ def prs(username):
 @app.route('/api/add_rep', methods=['POST'])
 def add_rep():
     data = request.get_json(force=True)
+    username = request.cookies.get('username')
     user = database.get_user(username=username)
+
+    user_exercices = user.get_exercices()
+    for index, exercice in enumerate(user_exercices):
+        if exercice['id'] == data['exercice_id'] and exercice['reps'] == data['reps'] and exercice['weight'] == data['weight']:
+            # if right exercice
+            if exercice['workout_id'] is None:
+                # if exercice was out of any workout, do not count it (?)
+                workout = False
+            else:
+                workout = bool(
+                    int(exercice['workout_id']) == int(data['workout_id']))
+            time_diff = bool(
+                        time.time() - exercice['timestamp'] < 24*60*60)
+            
+            if workout and time_diff:
+                document_filter = {'name': username}
+                document = database.users.find_one(document_filter)
+                target_sets = exercice['sets'] + 1
+                exercice.update({'sets': target_sets})
+                document["exercices"][index] = exercice
+                database.users.update_one(document_filter, {"$set": {"exercices": document["exercices"]}})
+                return {'success': True, 'data': {'sets': target_sets}}
+
     user.register_exercice(**data)
-    # prev_exercice = database.get_exercices(...)
+    return {'success': True, 'data': {'sets': 1}}
     # sets = prev_exercice['sets'] + data['sets']
     # database.workouts.update_one({'id': data['id']}, {'$set': data})
 

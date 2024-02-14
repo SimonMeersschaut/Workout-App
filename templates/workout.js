@@ -151,7 +151,7 @@ function stopDrag(data) {
         })
         .then(resp => resp.json())
         .then(data => {
-          alert('success')
+          alert(`You did ${data['data']['sets']} sets.`)
         });
       }
       // if (newX < -100){

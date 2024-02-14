@@ -142,14 +142,15 @@ class Exercice:
                 if exer:
                     # if right exercice
                     if exercice['workout_id'] is None:
-                        # if exercice was out of any workout, count it
-                        workout = True
+                        # if exercice was out of any workout, do not count it (?)
+                        workout = False
                     else:
                         workout = bool(
                             int(exercice['workout_id']) == int(workout_id))
                     time_diff = bool(
                         time.time() - exercice['timestamp'] < 24*60*60)
-                    self.data.update({'reps': exercice['reps'], 'sets': exercice['sets'], 'weight': exercice['weight']})
+                    # what does this do:
+                    # self.data.update({'reps': exercice['reps'], 'sets': exercice['sets'], 'weight': exercice['weight']})
                     if workout and time_diff:
                         self.data['done'] = True
         global_data = database.exercices.find({'id': self.data['id']})[0]
