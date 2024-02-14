@@ -21,9 +21,9 @@ function load_calendar(){
       if (recup){
         dayElement.classList.add('recup')
       }
-      if (today == current_day){
-        dayElement.classList.add('today')
-      }
+      // if (today == current_day){
+      //   dayElement.classList.add('today')
+      // }
       if (data['data'].includes(current_day)){
         dayElement.classList.add('active')
         streak += 1

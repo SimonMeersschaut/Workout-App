@@ -1,6 +1,7 @@
 const currentNumbers = { selector1: 0, selector2: 0, selector3: 0 };
 var allExercices = []
 var isEditing = false;
+// let click_handler = null;
 
 function addExercice(parent, data) {
   element = createElementFromHTML(`\
@@ -11,77 +12,160 @@ function addExercice(parent, data) {
     </div>
   </div>`);
   element.style.cursor = "pointer";
-  // onclick = () => showWorkoutPopup(data, (id) => {SubmitExercice(id)});
-  element.addEventListener('mousedown', (event) => {startDrag(event)})
+  // let data = data['id']
+  element.addEventListener('mousedown', (event) => {startDrag(event, data)})
+  element.addEventListener('touchstart', (event) => {startDrag(event, data)})
   parent.appendChild(element);
 }
 
 ///////////////////
 /* START OF DRAG */
 ///////////////////
-let offsetX, offsetY;
+let offsetX, offsetY, offsetScroll;
+let scrollMode;
 var isDragging = false;
 let currentDraggable;
 let timePress = 0;
 var newX = 0;
+var id_copy = null;
 
-document.addEventListener('mousedown', startDrag);
-
-function startDrag(e) {
-  let target = e.target;
-
-  // Check if the target or any of its ancestors have the class '.draggable'
-  while (target && !target.classList.contains('draggable')) {
-      target = target.parentElement;
+function startDrag(e, data) {
+  data_copy = data;
+  e.preventDefault();
+  const eventType = e.type === 'touchstart' ? e.touches[0] : e;
+  let target = eventType.target;
+  // CHECK TO REMOVE POPUP
+  while (target && !target.classList.contains('popup')) {
+    target = target.parentElement;
   }
 
   if (target) {
-      currentDraggable = target;
-      currentDraggable.style.transition = 'transform .1s'
-      timePress = new Date().getTime();
-      newX = 0;
-
-      // Store the initial position of the mouse pointer relative to the draggable element
-      offsetX = e.clientX// - currentDraggable.getBoundingClientRect().left;
-
-      // Set the flag to indicate dragging has started
-      isDragging = true;
-
-      // Attach the drag and mouseup event listeners
-      document.addEventListener('mousemove', drag);
-      document.addEventListener('mouseup', stopDrag);
+    // on popup
+  }
+  else{
+    removed = hidePopup()
+  }
+  if (!removed){
+    // RUN SLIDING MECHANISM
+    target = eventType.target;
+  
+    // Check if the target or any of its ancestors have the class '.draggable'
+    while (target && !target.classList.contains('draggable')) {
+        target = target.parentElement;
     }
+    if (target) {
+        currentDraggable = target;
+        currentDraggable.style.transition = 'transform .1s'
+        timePress = new Date().getTime();
+        newX = 0;
+  
+        // Store the initial position of the mouse pointer relative to the draggable element
+        const touchEvent = e.type === 'touchstart' ? e.touches[0] : e;
+        offsetX = touchEvent.clientX// - currentDraggable.getBoundingClientRect().left;
+        offsetY = touchEvent.clientY// - currentDraggable.getBoundingClientRect().left;
+        offsetScroll = window.scrollY;
+        // console.log(offsetScroll)
+
+        // Set scrollmode to starting position
+        scrollMode = undefined;
+  
+        // Set the flag to indicate dragging has started
+        isDragging = true;
+  
+        // Attach the drag and mouseup event listeners
+        // document.removeEventListener('mouseup', () => {stopDrag(click_handler)})
+        // document.removeEventListener('touchend', () => {stopDrag(click_handler)})
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', () => {stopDrag(data_copy)});
+        document.addEventListener('touchend', () => {stopDrag(data_copy)});
+      }
+  }
 }
 
 function drag(e) {
-    if (isDragging) {
-        // Calculate the new horizontal position of the dragged element
-        newX = e.clientX - offsetX;
+  e.preventDefault(); 
+  // console.log('draggin')
+  const eventType = e.type === 'touchmove' ? e.touches[0] : e;
 
+  if (isDragging) {
+      // Calculate the new horizontal and vertical drag
+      newX = eventType.clientX - offsetX;
+      newY = eventType.clientY - offsetY - offsetScroll;
+
+      if (scrollMode == undefined){
+        // no mode triggered yet
+        // TODO
+        if (Math.abs(newX) > 50){
+          scrollMode = 1 // horizontal scroll mode
+        }
+        else{
+          if (Math.abs(newY) > 50){
+            scrollMode = 2 // vertical scroll mode
+          }
+        }
+        
+      }
+
+      if (scrollMode == 1){
         // Set the new horizontal position using the transform property
         currentDraggable.style.transform = `translateX(${newX}px)`;
-    }
+      }
+      if (scrollMode == 2){
+        // Bind the Y offset to the scroll
+        window.scrollTo(0, -newY);
+      }
+  }
 }
 
-function stopDrag() {
+function stopDrag(data) {
     // Reset the offset values and flag
-    currentDraggable.style.transform = `translateX(0px)`;
-    offsetX = 0;
-    offsetY = 0;
-    isDragging = false;
-    currentDraggable = null;
-    // console.log(new Date().getTime() - timePress)
-    if (new Date().getTime() - timePress < 400){
-      // short press
-      if (newX < 50){
-        // short click
-        alert('short click')
+    if (currentDraggable !== null){
+      // if touchend and mouseup are bein registered, this will handle the error
+      currentDraggable.style.transform = `translateX(0px)`;
+      offsetX = 0;
+      offsetY = 0;
+      isDragging = false;
+      currentDraggable = null;
+      // console.log(new Date().getTime() - timePress)
+      if (new Date().getTime() - timePress < 400){
+        // short press/slide
+        if (newX < 50){
+          // short click
+          click_handler_copy()
+        }
       }
-    }
+      if (newX > 100){
+        console.log('[dev] adding rep')
+        // register rep
+        workout_id = parseInt(last_segment());
+        fetch("/api/add_rep", {
+          method: "POST",
+          body: JSON.stringify({
+            exercice_id: data['id'],
+            weight: data['weight'],
+            sets: 1,
+            reps: data['reps'],
+            workout_id: workout_id
+          }),
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          alert('success')
+        });
+      }
+      // if (newX < -100){
+      //   isEditing = true;
+      //   showWorkoutPopup(data, (id) => {SubmitExercice(data['id'])});
 
-    // Remove the event listeners when dragging stops
-    document.removeEventListener('mousemove', drag);
-    document.removeEventListener('mouseup', stopDrag);
+      // }
+  
+      // Remove the event listeners when dragging stops
+      // document.removeEventListener('mousemove', drag);
+      // document.removeEventListener('touchmove', drag);
+      document.onmouseup = () => {console.log('ok')};
+      document.ontouchend = null;
+    }
 }
 /*             */
 /* END OF DRAG */

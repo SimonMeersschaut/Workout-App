@@ -159,6 +159,15 @@ def active_days(username):
 def prs(username):
     return {'success': True, 'data': database.get_user(username=username).prs()}
 
+@app.route('/api/add_rep', methods=['POST'])
+def add_rep():
+    data = request.get_json(force=True)
+    user = database.get_user(username=username)
+    user.register_exercice(**data)
+    # prev_exercice = database.get_exercices(...)
+    # sets = prev_exercice['sets'] + data['sets']
+    # database.workouts.update_one({'id': data['id']}, {'$set': data})
+
 # SNS #
 
 

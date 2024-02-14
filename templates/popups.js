@@ -19,5 +19,7 @@ function hidePopup() {
   element = document.getElementById('popup-container')
   if (element !== null){
     element.remove()
+    return true;
   }
+  return false;
 }
